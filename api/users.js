@@ -161,5 +161,55 @@ router.post('/edit', passport.authenticate('jwt', { session: false }), async (re
         }
     })
 })
+const faker = require("faker");
+// function randomIntFromInterval(min, max) { // min and max included
+//     return Math.floor(Math.random() * (max - min + 1) + min);
+// }
+
+async function seedDB() { 
+    try {
+        
+        const collection = client.db("familyTies").collection("familyTiesBackend");
+        console.log('collection',collection)  
+        // make a bunch of time series data
+        let fakerClientsArray = [];
+        
+        for (let i = 0; i < 10; i++) {
+            const firstName = faker.name.firstName();
+            const lastName = faker.name.lastName();
+            const email = faker.internet.email();
+            const password = faker.internet.password();
+            
+            let fakeClients = {
+                firstName: firstName ,
+                lastName: lastName,
+                email: email,
+                password: password,
+                bio: [
+                    {
+                        profileImage: faker.image.imageUrl(),
+                        city: faker.address.city(),
+                        state: faker.address.state(),
+                        zipcode: faker.address.zipCode(),
+                        birthday: faker.date.past(),
+                        country: faker.address.country(),
+                        occupation: faker.name.jobTitle(),
+                        mobile: faker.phone.phoneNumber(),
+                        homePhone:faker.phone.phoneNumber() 
+                    }
+                ],
+            };
+            fakerClientsArray.push(fakeClients)
+            console.log(fakerClientsArray);
+        }
+        // User.collection.insertMany(fakerClientsArray);
+        
+        console.log("Database seeded! :)");
+    } catch (err) {
+        console.log(err.stack);
+    }
+}
+
+seedDB();
 module.exports = router;
 
