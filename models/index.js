@@ -7,9 +7,9 @@ let connectionString;
 if(process.env.NODE_ENV === 'production') {
     connectionString = process.env.DB_URL
 } else {
-    connectionString = process.env.DB_URL
+    connectionString = process.env.MONGO_URI
 }
-mongoose.connect(process.env.MONGO_URI, {
+mongoose.connect(connectionString, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: true
