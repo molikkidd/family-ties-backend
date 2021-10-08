@@ -3,7 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const jwt = require('json-web-token');
 const passport = require('passport');
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -66,58 +66,71 @@ router.post('/login', async (req, res) => {
     console.log(`/login route for >>>`,req.body);
     const email = req.body.email;
     const password = req.body.password;
-    const allUsers = await db.User.find({});
 
-    
-    // Find a user via email
-    db.User.findOne({ email })
-    .then(user => {
-        // If there is not a user
-        console.log(user);
-        if (!user) {
-            res.status(400).json({ msg: 'User not found'});
-        } else {
-            // A user is found in the database
-            bcrypt.compare(password, user.password)
-            .then(isMatch => {
-                // Check password for a match
+// Find a user via email
+db.User.findOne({ email })
+.then(user => {
+    // If there is not a user
+    console.log(user);
+    if (!user) {
+        res.status(400).json({ msg: 'User not found'});
+    } else {
+       
+        // A user is found in the database
+        bcrypt.compare(password, user.password)
+        .then(async isMatch => {
+            // Check password for a match
                 if (isMatch) {
                     console.log(isMatch);
                     // User match, send a JSON Web Token
                     // Create a token payload
                     // user.expiredToken = Date.now();
                     // await user.save();
+                    const familyMembers = await db.User.find({
+                        lastName: user.lastName
+                    });
+                    
                     const payload = {
                         id: user.id,
                         email: user.email,
                         firstName: user.firstName,
                         lastName: user.lastName,
                         bio: user.bio,
-                        allUsers: allUsers
+                        familyMembers: familyMembers,
+                        albums: user.albums
                         // expiredToken: user.expiredToken
                     };
                     // Sign token
                     // 3600 is one hour
-                    jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (error, token) => {
+
+                    // encode 
+                    jwt.encode( JWT_SECRET, payload, (error, token) => {
                         if (error) {
                             res.status(400).json({ msg: 'Session has ended, please log in again.'});
                         }
                         const verifyOptions = {
                             expiresIn:  60,
                         };
-
-                        const  legit = jwt.verify(token, JWT_SECRET, verifyOptions);
-                        console.log(legit);
-                        console.log({
-                            success: true,
-                            token: `Bearer ${token}`,
-                            userData: legit
-                        })
-                        res.json({
-                            success: true,
-                            token: `Bearer ${token}`,
-                            userData: legit
+                        console.log('token in jwt sign in', token )
+                        // decode
+                        jwt.decode(JWT_SECRET,token,function(err_, decodedPayload, decodedHeader) {
+                            if(err_) {
+                                console.error(err_.name, err.message);
+                            } else {
+                                console.log('decodepayload', decodedPayload, decodedHeader);
+                                console.log({
+                                    success: true,
+                                    token: `Bearer ${token}`,
+                                    userData: decodedPayload
+                                })
+                                res.json({
+                                    success: true,
+                                    token: `Bearer ${token}`,
+                                    userData: decodedPayload
+                                });
+                            }
                         });
+
                     });
                 } else {
                     return res.status(400).json({ msg: 'Email or Password is incorrect' });
@@ -141,26 +154,25 @@ router.get('/current', passport.authenticate('jwt', { session: false }), (req, r
     });
 });
 //POST api/users/edit (Private)
-router.post('/edit', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.post('/edit', passport.authenticate('jwt', { session: false }), (req, res) => {
     console.log('you have connected to the edit route on the api', req.body);
     const _id = req.body.id;
-    db.User.findOne({ id: _id })
-    .then(user => {
+
+    db.User.findById({ _id })
+    .then(async user => {
         console.log('found User in database', user);
         if (!user) {
             return res.status(400).json({ msg: 'User doesnt exist' });
         } else {
-            // Update User Info
-            const editData = {
-                firstName: req.body.firstName,
-                lastName: req.body.lastName,
-                email: req.body.email,
-                password: req.body.password
-            };
-
-            user.update(editData);
-
-            console.log('Updating User Info', editData,);
+            // Update User Info    
+            user.firstName = req.body.firstName || user.firstName
+            user.lastName = req.body.lastName || user.lastName
+            user.email = req.body.email || user.email
+            user.password = req.body.password || user.password
+            
+            await user.save();
+            res.json({user});
+            console.log('Updating User Info');
      
         }
     })

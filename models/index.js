@@ -2,12 +2,18 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 // const { MONGO_URI } = require('../config/keys');
 // Mongo connection
+let connectionString;
+
+if(process.env.NODE_ENV === 'production') {
+    connectionString = process.env.DB_URL
+} else {
+    connectionString = process.env.DB_URL
+}
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: true
 });
-console.log(process.env);
 // Mongoose connection object
 const db = mongoose.connection;
 

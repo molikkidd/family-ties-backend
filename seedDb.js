@@ -14,17 +14,19 @@ async function seedDB() {
         let hash = await bcrypt.hash(password, salt); 
         // empty client array
         let fakerClientsArray = [];
+      
+     
         // set how many clients you want to import 
-        for (let i = 0; i < 1000; i++) {
+        for (let i = 0; i < 10; i++) {
         // create clients 
             let fakeClients = {
                 firstName: faker.name.firstName(),
-                lastName: faker.name.lastName(),
+                lastName: 'Braun',
                 email: faker.internet.email(),
                 password: hash,
                 bio: [
                     {
-                        profileImage: faker.image.imageUrl(),
+                        profileImage: faker.image.avatar(),
                         city: faker.address.city(),
                         state: faker.address.state(),
                         zipcode: faker.address.zipCode(),
@@ -35,9 +37,35 @@ async function seedDB() {
                         homePhone:faker.phone.phoneNumber() 
                     }
                 ],
+                albums: [
+                    {albumName: 'NightLife',
+                    albumPics: [
+                        faker.image.avatar(), faker.image.avatar(),
+                        faker.image.avatar(), faker.image.avatar(),
+                        faker.image.avatar(), faker.image.avatar(),
+                        faker.image.avatar(), faker.image.avatar(),
+                        faker.image.avatar(), faker.image.avatar(),
+                    ]},
+                    {albumName: 'Food',albumPics: [
+                        faker.image.avatar(), faker.image.avatar(),
+                        faker.image.avatar(), faker.image.avatar(),
+                        faker.image.avatar(), faker.image.avatar(),
+                        faker.image.avatar(), faker.image.avatar(),
+                        faker.image.avatar(), faker.image.avatar(),
+                    ]},
+                    {albumName: 'City',albumPics: [      
+                        faker.image.avatar(), faker.image.avatar(),
+                        faker.image.avatar(), faker.image.avatar(),
+                        faker.image.avatar(), faker.image.avatar(),
+                        faker.image.avatar(), faker.image.avatar(),
+                        faker.image.avatar(), faker.image.avatar(),
+                    ]}
+                ]
             };
             // push clients into client array
             fakerClientsArray.push(fakeClients)
+            // console.log(fakeClients)
+
         }
         // add clientsArray to db
         // await User.insertMany(fakerClientsArray);
@@ -50,7 +78,9 @@ seedDB();
 const showAllUsers = async () => {
     const filteredList = [];
     // grab all the users
-    const findUsers = await User.find({});
+    const findUsers = await User.find({
+        lastName: 'Mayer'
+    });
     // filter thru the Users Array
     
     console.log(findUsers);

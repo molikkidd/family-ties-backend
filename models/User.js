@@ -22,6 +22,12 @@ const userSchema = new Schema({
         minLength: 8
     },
     bio: [],
+    albums: [
+        {
+            albumName: {type: String, required: true},
+            albumPics: []
+        }
+    ],
     timesLoggedIn: {
         type: Number,
         default: 0
