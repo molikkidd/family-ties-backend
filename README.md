@@ -94,6 +94,7 @@ git commit -m "Install dependencies for project"
 ```
 
 ## `2` Create config folder, passport.js file and `.env`
+
 passport.js will store the logic for our authentication of the users data, (password), by using a json web token.
 
 `1` Create .env file to store your JWT_SECRET=...
@@ -142,55 +143,23 @@ use FAMILY_TIES
 ## `3` Analyze File Structure
 
 ```text
+├── api
+│   └── users.js
 ├── config
-│   └── config.json
-│   └── ppConfig.json
-├── controllers
-│   └── auth.js
-│   └── profile.js
-├── middleware
-│   └── index.js
-├── migrations
-│   └── index.js
+│   └── passport.js
 ├── models
-│   └── index.js
+│   └── Bio.js
+│   └── Index.js
+│   └── User.js
 ├── node_modules
 │   └── ...
-├── public
-│   └── assets
-|       └── .keep 
-│   └── css
-│       └── dashboard.css
-│       └── style.css
-├── seeders
-│   └── auth.test.js
-├── test
-│   └── auth.test.js
-│   └── index.test.js
-│   └── profile.test.js
-│   └── user.test.js
-├── views
-│   └── auth
-│       └── login.ejs
-│       └── signup.ejs
-│   └── leads
-|       └── edit.ejs
-│       └── new.ejs
-│       └── show.ejs
-│   └── partials
-|       └── alert.ejs
-│   └── index.ejs
-│   └── layout.ejs
-│   └── leadsThree.ejs
-│   └── profile.ejs
 ├── .env
 ├── .gitignore
 ├── package-lock.json
 ├── package.json
 ├── README.md
+├── seedDb.js
 ├── server.js
-├── socketServer.js
-├── wSpage.html
 ```
 
 - `api`: The folder where all of your controllers ( routes ) will go to control the logic of your app.
@@ -279,9 +248,52 @@ git add .
 git commit -m "add: User models and validations"
 ```
 
-## `5` Create `users.js` file and endpoints for the `User` Model to Hash Password, Etc.
+## `5` Create `server.js` file for the apps main endpoints for the clients to connect to. 
+
+`1` Import the required dependicies, express as the server, cors will assist with cross origin resource sharing between browsers and application and passport with authenticate the users data 
+
+```js
+require('dotenv').config();
+const express = require('express');
+const app = express();
+const cors = require('cors');
+const passport = require('passport');
+require('./config/passport')(passport);
+const PORT = process.env.PORT || 8000;
+```
+
+Then connect your `users.js` file to the main server
+while telling the app to use following dependencies.
+
+Add the following code to the server file below
+
+```js
+const users = require('./api/users');
+
+// Middleware
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(cors());
+app.use(passport.initialize());
+```
+
+Add your home/index route to the api and set the port
+
+```js
+// Home route
+app.get('/', (req, res) => {
+    res.status(200).json({ message: 'Welcome to the Family Ties API' });
+});
+app.use('/api/users', users);
+app.listen(PORT, () => {
+    console.log(`Smooth Sailing 🎧 on port: ${PORT}`);
+});
+```
+
+## `6` Create `users.js` file and endpoints for the `User` Model to Hash Password, Etc.
 
 `1` Create `api` folder Import `express`, `bcryptjs` and other auth dependencies to the top the users.js file.
+
 ```js
 
 require('dotenv').config();
@@ -329,7 +341,7 @@ router.post('/register', (req, res) => {
 })
 ```
 
-## `3` Create login route for the `User`
+## `7` Create login route for the `User`
 
 ```js
 router.post('/login', async (req, res) => {
@@ -408,7 +420,7 @@ INSERT UPDATED SCREEN SHOT BELOW
 `3` Verify that model looks like the following code snippet ( [here](https://github.com/romebell/express_authentication/blob/main/solutions.md#1-userjs) )
 
 
-## `6` Create `index.js` inside `models` folder
+## `8` Create `index.js` inside `models` folder
 
 The index model is responsible for connecting our models to the mongo database. The index uses the mongoose object document mapper to connect to mongodb.
 
@@ -486,7 +498,7 @@ router.post('/edit', passport.authenticate('jwt', { session: false }), (req, res
 module.exports = router;
 ```
 
-## `8` Start App and Debug
+## `9` Start App and Debug
 
 `1` Start up server and test app
 
