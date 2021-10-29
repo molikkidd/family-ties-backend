@@ -9,7 +9,7 @@ if(process.env.NODE_ENV === 'production') {
 } else {
     connectionString = process.env.MONGO_URI
 }
-mongoose.connect(connectionString, {
+mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: true

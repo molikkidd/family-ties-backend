@@ -47,7 +47,6 @@ router.post('/register', (req, res) => {
             // Salt and hash the password, then save the user
             bcrypt.genSalt(10, (err, salt) => {
                 // if (err) throw Error;
-
                 bcrypt.hash(newUser.password, salt, (error, hash) => {
                     // if (error) throw Error;
                     // Change the password in newUser to the hash
@@ -75,7 +74,6 @@ db.User.findOne({ email })
     if (!user) {
         res.status(400).json({ msg: 'User not found'});
     } else {
-       
         // A user is found in the database
         bcrypt.compare(password, user.password)
         .then(async isMatch => {
@@ -108,9 +106,7 @@ db.User.findOne({ email })
                         if (error) {
                             res.status(400).json({ msg: 'Session has ended, please log in again.'});
                         }
-                        const verifyOptions = {
-                            expiresIn:  60,
-                        };
+                     
                         console.log('token in jwt sign in', token )
                         // decode
                         jwt.decode(JWT_SECRET,token,function(err_, decodedPayload, decodedHeader) {
@@ -169,8 +165,9 @@ router.post('/edit', passport.authenticate('jwt', { session: false }), (req, res
             user.lastName = req.body.lastName || user.lastName
             user.email = req.body.email || user.email
             user.password = req.body.password || user.password
-            
+            // save information
             await user.save();
+            // then convert to json 
             res.json({user});
             console.log('Updating User Info');
      

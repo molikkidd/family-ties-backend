@@ -17,11 +17,11 @@ async function seedDB() {
       
      
         // set how many clients you want to import 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 100; i++) {
         // create clients 
             let fakeClients = {
                 firstName: faker.name.firstName(),
-                lastName: 'Braun',
+                lastName: faker.name.lastName(),
                 email: faker.internet.email(),
                 password: hash,
                 bio: [
@@ -68,7 +68,7 @@ async function seedDB() {
 
         }
         // add clientsArray to db
-        // await User.insertMany(fakerClientsArray);
+        await User.insertMany(fakerClientsArray);
     } catch (err) {
         console.log(err.stack);
     }
